@@ -1,0 +1,47 @@
+experiment_name: strip_geometries
+project_root: ..
+
+capture:
+  checkpoint: checkpoints/vith14_in1k_ep300.pth.tar
+  model_name: ijepa-vit-h-in1k
+  imagenet_root: datasets/imagenet/val
+  manifest: null
+  output_root: outputs/ijepa_experiments
+  num_classes: 50
+  samples_per_class: 20
+  test_fraction: 0.2
+  batch_size: 16
+  layers: all
+  seed: 42
+  device: auto
+  precision: auto
+  save_context_tokens: true
+  save_predictor_hidden: true
+  check_only: false
+  conditions:
+    - {name: strip_small_horizontal, enabled: true, mask: [2, 8], position: center, augmentation: clean}
+    - {name: strip_small_vertical, enabled: true, mask: [8, 2], position: center, augmentation: clean}
+    - {name: strip_large_horizontal, enabled: true, mask: [4, 12], position: center, augmentation: clean}
+    - {name: strip_large_vertical, enabled: true, mask: [12, 4], position: center, augmentation: clean}
+  vit_baseline:
+    enabled: false
+    repo: facebookresearch/dinov2
+    source: github
+    model: dinov2_vitb14
+    checkpoint: null
+    layers: all
+    input: target
+
+analysis:
+  capture_dir: null
+  ridge: 0.01
+  probe_mode: cross_validation
+  n_folds: 5
+  ridge_values: [0.0001, 0.001, 0.01, 0.1, 1.0]
+  probe_seed: 42
+  run_shuffled_label_control: true
+  comparison_reference: strip_small_horizontal
+  variance_quantile: 0.5
+  run_probe: true
+  run_patch_alignment: true
+  export_readable_raw_metrics: true
